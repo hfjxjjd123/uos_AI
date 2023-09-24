@@ -1,11 +1,8 @@
-use std::{thread,time};
-
 // Experiment with learning AND, OR, and XOR gates (two-dimensional input).
 // Show the learning process using graphs (two-dimensional straight-line graph).
 // Error graph for iterative learning
 // Implement using modules // Bonus points if implemented as a class.
 // Compose output calculation and learning process as member functions.
-const INPUT_DIM: u32 = 2;
 const SAMPLE_SIZE: u32 = 4;
 
 //AND Gate
@@ -89,16 +86,15 @@ fn learning(x: &Vec<Vec<i32>>, y: &Vec<i32>){
     let mut o = classification(&a);
     println!("init output: {:?}", o);
 
-    while !o.eq(y){
+    while &o!=y {
         iter_count += 1;
 
         weights_update(&mut weights, &mut bias, &a, x, y, learning_rate);
 
         let a = forward_propagation(x, &weights, bias);
-        let o = classification(&a);
-        println!("weights of {:?}th iter: {:?}x1 + {:?}x2 + {:?}", iter_count, weights[0], weights[1], bias);
+        o = classification(&a);
+        println!("weights of {:?}th iter: {:.3} * x1 + {:.3} * x2 + {:.3}", iter_count, weights[0], weights[1], bias);
         println!("{:?}", o);
-        thread::sleep(time::Duration::from_millis(100));
     }
 
 }
