@@ -39,17 +39,23 @@ fn forward_propagation(x: &Vec<Vec<i32>>, weights: &Vec<f64>, bias: f64)->Vec<f6
     a_vec
 }
 
-fn weights_update(weights: &mut Vec<f64>, a: &Vec<f64> ,x: &Vec<Vec<i32>>, alpha: f64)->Vec<f64>{
+fn weights_update(weights: &mut Vec<f64>, bias: &mut f64, a: &Vec<f64> ,x: &Vec<Vec<i32>>, y: &Vec<i32>, alpha: f64)->Vec<f64>{
     let mut dW_vec = vec![];
+    let mut db: f64 = 0.0;
 
     for i in 0..x[0].len(){
         let mut dW = 0.0;
+
         for j in 0..x.len(){
-            dW += alpha * a[i] * (1.0 - a[i]) * (x[j][i] as f64);
+            dW += alpha * (a[i] - (y[i] as f64)) * a[i] * (1.0 - a[i]) * (x[j][i] as f64);
+            db += alpha * (a[i] - (y[i] as f64)) * a[i] * (1.0 - a[i]);
         } 
         dW = dW/(SAMPLE_SIZE as f64);
+        db = db/(SAMPLE_SIZE as f64);
+
         dW_vec.push(dW);
         weights[i] = weights[i] - dW;
+        *bias = *bias - db;
     }
     dW_vec
 }
@@ -75,7 +81,7 @@ fn classification(a_vec: &Vec<f64>)->Vec<i32>{
 fn learning(x: &Vec<Vec<i32>>, y: &Vec<i32>){
     let mut weights = vec![0.2,0.5];
     let mut bias: f64 = 0.0;
-    let learning_rate = 0.1;
+    let learning_rate = 0.5;
 
     let mut iter_count = 0;
 
@@ -86,13 +92,13 @@ fn learning(x: &Vec<Vec<i32>>, y: &Vec<i32>){
     while !o.eq(y){
         iter_count += 1;
 
-        weights_update(&mut weights, &a, x, learning_rate);
+        weights_update(&mut weights, &mut bias, &a, x, y, learning_rate);
 
         let a = forward_propagation(x, &weights, bias);
         let o = classification(&a);
-        println!("weights of {:?}th iter: {:?}", iter_count, weights);
+        println!("weights of {:?}th iter: {:?}x1 + {:?}x2 + {:?}", iter_count, weights[0], weights[1], bias);
         println!("{:?}", o);
-        thread::sleep(time::Duration::from_millis(10));
+        thread::sleep(time::Duration::from_millis(100));
     }
 
 }
